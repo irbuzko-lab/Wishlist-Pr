@@ -2,8 +2,9 @@
 const firebaseConfig = {
   apiKey: "AIzaSyApJqI0W0HAybT-Y49QAH0jpOxjexuFC10",
   authDomain: "wishlist-app-848bc.firebaseapp.com",
+  databaseURL: "https://wishlist-app-848bc-default-rtdb.firebaseio.com",
   projectId: "wishlist-app-848bc",
-  storageBucket: "wishlist-app-848bc.firebasestorage.app",
+  storageBucket: "wishlist-app-848bc.appspot.com",
   messagingSenderId: "377772763628",
   appId: "1:377772763628:web:2a17b64e4cf566b55af8c9"
 };
