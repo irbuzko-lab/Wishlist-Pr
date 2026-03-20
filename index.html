@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wishlist Premium</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app-container">
+    <h1>Wishlist</h1>
+
+    <div class="tabs">
+        <button class="tab-btn active" data-user="Іринка">Іринка</button>
+        <button class="tab-btn" data-user="Подруга1">Дашка</button>
+        <button class="tab-btn" data-user="Подруга2">Іра</button>
+    </div>
+
+    <div class="user-actions">
+        <button id="addItemBtn">Додати річ</button>
+        <button id="viewListBtn">Подивитися список</button>
+    </div>
+
+    <form id="itemForm" class="hidden">
+        <label>Додати фото:</label>
+        <input type="file" id="itemImageFile" accept="image/*">
+        <input type="text" id="itemName" placeholder="Назва" required>
+        <input type="number" id="itemPrice" placeholder="Ціна" required>
+        <select id="itemCategory" required>
+            <option value="" disabled selected>Оберіть категорію</option>
+            <option value="Аксесуари">Аксесуари</option>
+            <option value="Побут">Побут</option>
+            <option value="Одяг">Одяг</option>
+            <option value="Гаджети">Гаджети</option>
+        </select>
+        <input type="text" id="itemStore" placeholder="Магазин" required>
+        <label>Наскільки сильно хочеш (1-5):</label>
+        <select id="itemPriority" required>
+            <option value="" disabled selected>Оберіть рівень</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+        </select>
+        <button type="submit">Додати</button>
+        <button type="button" id="cancelBtn">Скасувати</button>
+    </form>
+
+    <div class="filters hidden">
+        <select id="filterCategory">
+            <option value="">Всі категорії</option>
+            <option value="Аксесуари">Аксесуари</option>
+            <option value="Побут">Побут</option>
+            <option value="Одяг">Одяг</option>
+            <option value="Гаджети">Гаджети</option>
+        </select>
+        <input type="number" id="filterMaxPrice" placeholder="Макс ціна">
+        <button id="filterBtn">Фільтрувати</button>
+        <button id="clearFilterBtn">Скинути фільтри</button>
+    </div>
+
+    <div id="itemList"></div>
+    <div id="totalSum"></div>
+</div>
+
+<div id="itemModal" class="modal hidden">
+    <div class="modal-content">
+        <span class="close-modal">&times;</span>
+        <div id="modalDetails"></div>
+    </div>
+</div>
+
+<script type="module" src="script.js"></script>
+</body>
+</html>
