@@ -15,154 +15,115 @@ import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-let currentUser = "Іринка";
-let currentData = {};
+let user = "Іринка";
+let data = {};
+let unsubscribe = null;
 
-// ЕЛЕМЕНТИ
-const itemForm = document.getElementById("itemForm");
-const itemList = document.getElementById("itemList");
-const modal = document.getElementById("itemModal");
-const modalDetails = document.getElementById("modalDetails");
-
-// ---------------- UI ----------------
-
-// додати
-document.getElementById("addItemBtn").onclick = () => {
-    itemForm.classList.remove("hidden");
-    itemList.classList.add("hidden");
-};
-
-// список
-document.getElementById("viewListBtn").onclick = () => {
-    itemList.classList.remove("hidden");
-    itemForm.classList.add("hidden");
-};
-
-// скасувати
-document.getElementById("cancelBtn").onclick = () => {
-    itemForm.classList.add("hidden");
-};
+// елементи
+const form = document.getElementById("form");
+const list = document.getElementById("list");
+const modal = document.getElementById("modal");
+const modalContent = document.getElementById("modalContent");
 
 // вкладки
-document.querySelectorAll(".tab-btn").forEach(btn => {
-    btn.onclick = () => {
-        document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
-        btn.classList.add("active");
+document.querySelectorAll(".tab").forEach(btn => {
+  btn.onclick = () => {
+    document.querySelectorAll(".tab").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
 
-        currentUser = btn.getAttribute("data-user");
-
-        // очистка перед завантаженням
-        itemList.innerHTML = "";
-        loadData();
-    };
+    user = btn.dataset.user;
+    load();
+  };
 });
 
-// ---------------- ДОДАВАННЯ ----------------
-
-itemForm.onsubmit = (e) => {
-    e.preventDefault();
-
-    const comment = document.getElementById("itemComment").value;
-    const file = document.getElementById("itemImageFile").files[0];
-
-    if (!file) {
-        alert("Додай фото!");
-        return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-        push(ref(db, 'wishlists/' + currentUser), {
-            image: ev.target.result,
-            comment: comment || ""
-        });
-
-        itemForm.reset();
-        itemForm.classList.add("hidden");
-    };
-
-    reader.readAsDataURL(file);
+// кнопки
+addBtn.onclick = () => {
+  form.classList.remove("hidden");
+  list.classList.add("hidden");
 };
 
-// ---------------- ЗАВАНТАЖЕННЯ ----------------
+viewBtn.onclick = () => {
+  list.classList.remove("hidden");
+  form.classList.add("hidden");
+};
 
-function loadData() {
-    onValue(ref(db, 'wishlists/' + currentUser), (snapshot) => {
-        const data = snapshot.val();
-        currentData = data || {};
+// додати
+form.onsubmit = e => {
+  e.preventDefault();
 
-        itemList.innerHTML = "";
+  const file = fileInput.files[0];
+  const comment = commentInput.value;
 
-        if (!data) return;
+  if (!file) return;
 
-        Object.keys(data).forEach(key => {
-            const item = data[key];
-
-            // якщо раптом биті дані — пропускаємо
-            if (!item || !item.image) return;
-
-            const div = document.createElement("div");
-            div.className = "photo-item";
-
-            // фото
-            const img = document.createElement("img");
-            img.src = item.image;
-
-            img.onclick = () => {
-                openModal(key);
-            };
-
-            // кнопка видалення
-            const btn = document.createElement("button");
-            btn.className = "deleteBtn";
-            btn.textContent = "🗑";
-
-            btn.onclick = (e) => {
-                e.stopPropagation(); // 💥 не відкриває модалку
-                deleteItem(key);
-            };
-
-            div.appendChild(img);
-            div.appendChild(btn);
-            itemList.appendChild(div);
-        });
+  const reader = new FileReader();
+  reader.onload = ev => {
+    push(ref(db, "wishlists/" + user), {
+      image: ev.target.result,
+      comment
     });
+
+    form.reset();
+    form.classList.add("hidden");
+  };
+
+  reader.readAsDataURL(file);
+};
+
+// load
+function load() {
+  if (unsubscribe) unsubscribe();
+
+  unsubscribe = onValue(ref(db, "wishlists/" + user), snap => {
+    data = snap.val() || {};
+    list.innerHTML = "";
+
+    Object.keys(data).forEach(key => {
+      const item = data[key];
+      if (!item.image) return;
+
+      const div = document.createElement("div");
+      div.className = "item";
+
+      const img = document.createElement("img");
+      img.src = item.image;
+
+      img.onclick = () => openModal(key);
+
+      const del = document.createElement("button");
+      del.textContent = "🗑";
+      del.className = "delete";
+
+      del.onclick = e => {
+        e.stopPropagation();
+        remove(ref(db, "wishlists/" + user + "/" + key));
+      };
+
+      div.append(img, del);
+      list.append(div);
+    });
+  });
 }
 
-// ---------------- МОДАЛКА ----------------
-
+// модалка
 function openModal(key) {
-    const item = currentData[key];
+  const item = data[key];
+  if (!item) return;
 
-    // захист від бага
-    if (!item || !item.image) return;
+  modalContent.innerHTML = `
+    <img src="${item.image}">
+    ${item.comment ? `<p>${item.comment}</p>` : ""}
+  `;
 
-    modalDetails.innerHTML = `
-        <img src="${item.image}">
-        ${item.comment ? `<p>${item.comment}</p>` : ""}
-    `;
-
-    modal.classList.remove("hidden");
+  modal.classList.add("active");
 }
 
-// закрити кнопкою
-document.querySelector(".close-modal").onclick = () => {
-    modal.classList.add("hidden");
+// закриття
+close.onclick = () => modal.classList.remove("active");
+
+modal.onclick = e => {
+  if (e.target === modal) modal.classList.remove("active");
 };
-
-// закрити кліком поза
-modal.onclick = (e) => {
-    if (e.target === modal) {
-        modal.classList.add("hidden");
-    }
-};
-
-// ---------------- ВИДАЛЕННЯ ----------------
-
-function deleteItem(key) {
-    remove(ref(db, `wishlists/${currentUser}/${key}`));
-}
 
 // старт
-modal.classList.add("hidden");
-loadData();
+load();
