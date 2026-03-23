@@ -16,7 +16,7 @@ import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-let currentUser = "Іринка"; 
+let currentUser = "Аллочки"; 
 let currentData = {};
 
 // Перегляд фото
