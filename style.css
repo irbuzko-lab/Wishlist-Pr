@@ -1,25 +1,14 @@
-@import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Montserrat:wght@500;700&family=Playfair+Display:wght@700&display=swap');
-
 body {
-  font-family: 'Lato', sans-serif;
-  background-color: #f9f7f6;
+  font-family: sans-serif;
+  background: #f5f5f5;
   margin: 0;
-  padding: 10px;
 }
 
 .app-container {
-  max-width: 550px;
+  max-width: 500px;
   margin: auto;
-  background-color: #fff;
+  background: white;
   padding: 20px;
-  border-left: 4px solid #800020;
-  border-right: 4px solid #800020;
-}
-
-h1 {
-  text-align: center;
-  color: #800020;
-  font-family: 'Playfair Display', serif;
 }
 
 .tabs {
@@ -30,25 +19,17 @@ h1 {
 .tab-btn {
   flex: 1;
   padding: 10px;
-  border: 1px solid #800020;
-  background: white;
   cursor: pointer;
 }
 
 .tab-btn.active {
-  background: #800020;
+  background: black;
   color: white;
 }
 
 .user-actions button {
   width: 100%;
-  margin: 10px 0;
-  padding: 10px;
-}
-
-form input, form button {
-  width: 100%;
-  margin: 8px 0;
+  margin: 5px 0;
   padding: 10px;
 }
 
@@ -61,17 +42,27 @@ form input, form button {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-  justify-content: center;
 }
 
 .photo-item {
   width: 120px;
+  position: relative;
   cursor: pointer;
 }
 
 .photo-item img {
   width: 100%;
-  border-radius: 8px;
+}
+
+/* КОШИК */
+.deleteBtn {
+  position: absolute;
+  bottom: 5px;
+  right: 5px;
+  background: white;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
 }
 
 /* МОДАЛКА */
