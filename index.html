@@ -3,43 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wishlist Premium</title>
+    <title>My Wishlist</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
 <div class="app-container">
-    <h1>Wishlist</h1>
-
-    <div class="tabs">
-        <button class="tab-btn active" data-user="Іринка">Аллочка</button>
-        <button class="tab-btn" data-user="Дашка">Дашка</button>
-        <button class="tab-btn" data-user="Іра">Іра</button>
-    </div>
+    <header>
+        <h1>Wishlist</h1>
+        <div class="tabs">
+            <button class="tab-btn active" data-user="Іринка">Аллочка</button>
+            <button class="tab-btn" data-user="Дашка">Дашка</button>
+            <button class="tab-btn" data-user="Іра">Іра</button>
+        </div>
+    </header>
 
     <div class="user-actions">
-        <button id="addItemBtn">Додати річ</button>
-        <button id="viewListBtn">Подивитися список</button>
+        <button id="addItemBtn" class="main-btn"><i class="fas fa-plus"></i> Додати річ</button>
     </div>
 
     <form id="itemForm" class="hidden">
-        <h3>Нове бажання</h3>
-        <label>Фото (обов'язково):</label>
-        <input type="file" id="itemImageFile" accept="image/*" required>
-        <input type="text" id="itemName" placeholder="Назва речі" required>
-        <input type="text" id="itemComment" placeholder="Коментар (необов'язково)">
+        <div class="form-group">
+            <label for="itemImageFile">Оберіть фото</label>
+            <input type="file" id="itemImageFile" accept="image/*" required>
+        </div>
+        <div class="form-group">
+            <input type="text" id="itemComment" placeholder="Твій коментар або назва (необов'язково)">
+        </div>
         <div class="form-buttons">
             <button type="submit" class="save-btn">Зберегти</button>
             <button type="button" id="cancelBtn" class="cancel-btn">Скасувати</button>
         </div>
     </form>
 
-    <div id="itemList" class="grid-container"></div>
+    <div id="itemList" class="wish-grid"></div>
 </div>
 
 <div id="itemModal" class="modal hidden">
+    <span class="close-modal">&times;</span>
     <div class="modal-content">
-        <span class="close-modal">&times;</span>
         <div id="modalDetails"></div>
     </div>
 </div>
