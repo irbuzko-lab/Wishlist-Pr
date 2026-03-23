@@ -10,7 +10,7 @@ const firebaseConfig = {
 };
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
@@ -20,9 +20,16 @@ let currentData = {};
 
 // UI
 const itemForm = document.getElementById("itemForm");
+const itemList = document.getElementById("itemList");
 
 document.getElementById("addItemBtn").onclick = () => {
     itemForm.classList.remove("hidden");
+    itemList.classList.add("hidden");
+};
+
+document.getElementById("viewListBtn").onclick = () => {
+    itemList.classList.remove("hidden");
+    itemForm.classList.add("hidden");
 };
 
 document.getElementById("cancelBtn").onclick = () => {
@@ -66,16 +73,16 @@ function loadData() {
         const data = snapshot.val();
         currentData = data || {};
 
-        const container = document.getElementById("itemList");
-        container.innerHTML = "";
+        itemList.innerHTML = "";
 
         if (data) {
             Object.keys(data).forEach(key => {
                 const item = data[key];
 
-                container.innerHTML += `
-                    <div class="photo-item" onclick="openModal('${key}')">
-                        <img src="${item.image}">
+                itemList.innerHTML += `
+                    <div class="photo-item">
+                        <img src="${item.image}" onclick="openModal('${key}')">
+                        <button class="deleteBtn" onclick="deleteItem('${key}')">🗑</button>
                     </div>
                 `;
             });
@@ -83,13 +90,12 @@ function loadData() {
     });
 }
 
-// модалка
+// відкрити
 window.openModal = function(key) {
     const item = currentData[key];
     if (!item) return;
 
-    const modalDetails = document.getElementById("modalDetails");
-    modalDetails.innerHTML = `
+    document.getElementById("modalDetails").innerHTML = `
         <img src="${item.image}">
         ${item.comment ? `<p>${item.comment}</p>` : ""}
     `;
@@ -97,6 +103,12 @@ window.openModal = function(key) {
     document.getElementById("itemModal").classList.remove("hidden");
 };
 
+// видалити
+window.deleteItem = function(key) {
+    remove(ref(db, `wishlists/${currentUser}/${key}`));
+};
+
+// закрити модалку
 document.querySelector(".close-modal").onclick = () => {
     document.getElementById("itemModal").classList.add("hidden");
 };
