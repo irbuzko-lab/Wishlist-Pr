@@ -18,34 +18,26 @@ const db = getDatabase(app);
 let currentUser = "Іринка";
 let currentData = {};
 
-// Відкрити модалку з повним фото
+// Відкрити фото на весь екран
 window.openModal = function(key) {
     const item = currentData[key];
     const modal = document.getElementById("itemModal");
-    const details = document.getElementById("modalDetails");
-    
-    details.innerHTML = `
-        <img src="${item.image}" alt="photo">
-        <h2>${item.name}</h2>
+    document.getElementById("modalDetails").innerHTML = `
+        <img src="${item.image}">
         <p>${item.comment || ''}</p>
     `;
     modal.classList.remove("hidden");
 };
 
-// Видалення (тільки через іконку)
+// Видалення
 window.deleteItem = function(e, key) {
-    e.stopPropagation(); // Щоб не відкривалася модалка при натисканні на кошик
-    if(confirm("Видалити цю річ?")) {
+    e.stopPropagation();
+    if(confirm("Видалити це бажання?")) {
         remove(ref(db, `wishlists/${currentUser}/${key}`));
     }
 };
 
-// Закриття модалки
-document.querySelector(".close-modal").onclick = () => {
-    document.getElementById("itemModal").classList.add("hidden");
-};
-
-// Перемикання табів
+// Перемикання користувачів
 document.querySelectorAll(".tab-btn").forEach(btn => {
     btn.onclick = () => {
         document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
@@ -55,24 +47,24 @@ document.querySelectorAll(".tab-btn").forEach(btn => {
     };
 });
 
-// Кнопки форми
-document.getElementById("addItemBtn").onclick = () => document.getElementById("itemForm").classList.remove("hidden");
+// Кнопки інтерфейсу
+document.getElementById("addItemBtn").onclick = () => document.getElementById("itemForm").classList.toggle("hidden");
 document.getElementById("cancelBtn").onclick = () => document.getElementById("itemForm").classList.add("hidden");
+document.querySelector(".close-modal").onclick = () => document.getElementById("itemModal").classList.add("hidden");
 
-// Додавання товару з фото
+// Збереження нового бажання
 document.getElementById("itemForm").onsubmit = function(e) {
     e.preventDefault();
     const file = document.getElementById("itemImageFile").files[0];
-    const name = document.getElementById("itemName").value;
     const comment = document.getElementById("itemComment").value;
+
+    if (!file) return alert("Будь ласка, обери фото");
 
     const reader = new FileReader();
     reader.onload = function() {
-        const base64Image = reader.result;
-        push(ref(db, 'wishlists/' + currentUser), {
-            name: name,
-            comment: comment,
-            image: base64Image
+        push(ref(db, `wishlists/${currentUser}`), {
+            image: reader.result,
+            comment: comment
         });
         e.target.reset();
         document.getElementById("itemForm").classList.add("hidden");
@@ -80,8 +72,9 @@ document.getElementById("itemForm").onsubmit = function(e) {
     reader.readAsDataURL(file);
 };
 
+// Завантаження списку
 function loadData() {
-    onValue(ref(db, 'wishlists/' + currentUser), (snapshot) => {
+    onValue(ref(db, `wishlists/${currentUser}`), (snapshot) => {
         const data = snapshot.val();
         currentData = data || {};
         const container = document.getElementById("itemList");
@@ -91,11 +84,8 @@ function loadData() {
             Object.keys(data).forEach(key => {
                 const item = data[key];
                 container.innerHTML += `
-                    <div class="item-card" onclick="openModal('${key}')">
+                    <div class="wish-card" onclick="openModal('${key}')">
                         <img src="${item.image}">
-                        <div class="item-card-info">
-                            <strong>${item.name}</strong>
-                        </div>
                         <button class="delete-btn" onclick="deleteItem(event, '${key}')">
                             <i class="fas fa-trash"></i>
                         </button>
@@ -103,7 +93,7 @@ function loadData() {
                 `;
             });
         } else {
-            container.innerHTML = "<p style='text-align:center; grid-column: 1/3;'>Список порожній</p>";
+            container.innerHTML = "<p style='grid-column: 1/3; text-align: center; color: #999; margin-top: 20px;'>Тут поки порожньо...</p>";
         }
     });
 }
