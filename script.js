@@ -18,20 +18,27 @@ const db = getDatabase(app);
 let currentUser = "Іринка";
 let currentData = {};
 
-// UI
+// ЕЛЕМЕНТИ
 const itemForm = document.getElementById("itemForm");
 const itemList = document.getElementById("itemList");
+const modal = document.getElementById("itemModal");
+const modalDetails = document.getElementById("modalDetails");
 
+// ---------------- UI ----------------
+
+// додати
 document.getElementById("addItemBtn").onclick = () => {
     itemForm.classList.remove("hidden");
     itemList.classList.add("hidden");
 };
 
+// список
 document.getElementById("viewListBtn").onclick = () => {
     itemList.classList.remove("hidden");
     itemForm.classList.add("hidden");
 };
 
+// скасувати
 document.getElementById("cancelBtn").onclick = () => {
     itemForm.classList.add("hidden");
 };
@@ -41,19 +48,27 @@ document.querySelectorAll(".tab-btn").forEach(btn => {
     btn.onclick = () => {
         document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
         btn.classList.add("active");
+
         currentUser = btn.getAttribute("data-user");
+
+        // очистка перед завантаженням
+        itemList.innerHTML = "";
         loadData();
     };
 });
 
-// додавання
+// ---------------- ДОДАВАННЯ ----------------
+
 itemForm.onsubmit = (e) => {
     e.preventDefault();
 
     const comment = document.getElementById("itemComment").value;
     const file = document.getElementById("itemImageFile").files[0];
 
-    if (!file) return alert("Додай фото!");
+    if (!file) {
+        alert("Додай фото!");
+        return;
+    }
 
     const reader = new FileReader();
     reader.onload = (ev) => {
@@ -61,13 +76,16 @@ itemForm.onsubmit = (e) => {
             image: ev.target.result,
             comment: comment || ""
         });
+
         itemForm.reset();
         itemForm.classList.add("hidden");
     };
+
     reader.readAsDataURL(file);
 };
 
-// завантаження
+// ---------------- ЗАВАНТАЖЕННЯ ----------------
+
 function loadData() {
     onValue(ref(db, 'wishlists/' + currentUser), (snapshot) => {
         const data = snapshot.val();
@@ -75,42 +93,76 @@ function loadData() {
 
         itemList.innerHTML = "";
 
-        if (data) {
-            Object.keys(data).forEach(key => {
-                const item = data[key];
+        if (!data) return;
 
-                itemList.innerHTML += `
-                    <div class="photo-item">
-                        <img src="${item.image}" onclick="openModal('${key}')">
-                        <button class="deleteBtn" onclick="deleteItem('${key}')">🗑</button>
-                    </div>
-                `;
-            });
-        }
+        Object.keys(data).forEach(key => {
+            const item = data[key];
+
+            // якщо раптом биті дані — пропускаємо
+            if (!item || !item.image) return;
+
+            const div = document.createElement("div");
+            div.className = "photo-item";
+
+            // фото
+            const img = document.createElement("img");
+            img.src = item.image;
+
+            img.onclick = () => {
+                openModal(key);
+            };
+
+            // кнопка видалення
+            const btn = document.createElement("button");
+            btn.className = "deleteBtn";
+            btn.textContent = "🗑";
+
+            btn.onclick = (e) => {
+                e.stopPropagation(); // 💥 не відкриває модалку
+                deleteItem(key);
+            };
+
+            div.appendChild(img);
+            div.appendChild(btn);
+            itemList.appendChild(div);
+        });
     });
 }
 
-// відкрити
-window.openModal = function(key) {
-    const item = currentData[key];
-    if (!item) return;
+// ---------------- МОДАЛКА ----------------
 
-    document.getElementById("modalDetails").innerHTML = `
+function openModal(key) {
+    const item = currentData[key];
+
+    // захист від бага
+    if (!item || !item.image) return;
+
+    modalDetails.innerHTML = `
         <img src="${item.image}">
         ${item.comment ? `<p>${item.comment}</p>` : ""}
     `;
 
-    document.getElementById("itemModal").classList.remove("hidden");
-};
+    modal.classList.remove("hidden");
+}
 
-// видалити
-window.deleteItem = function(key) {
-    remove(ref(db, `wishlists/${currentUser}/${key}`));
-};
-
-// закрити модалку
+// закрити кнопкою
 document.querySelector(".close-modal").onclick = () => {
-    document.getElementById("itemModal").classList.add("hidden");
+    modal.classList.add("hidden");
 };
 
+// закрити кліком поза
+modal.onclick = (e) => {
+    if (e.target === modal) {
+        modal.classList.add("hidden");
+    }
+};
+
+// ---------------- ВИДАЛЕННЯ ----------------
+
+function deleteItem(key) {
+    remove(ref(db, `wishlists/${currentUser}/${key}`));
+}
+
+// старт
+modal.classList.add("hidden");
 loadData();
