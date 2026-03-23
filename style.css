@@ -104,28 +104,62 @@ input[type="file"] { display: none; }
 .cancel-btn { flex: 1; background: #ccc; color: white; border: none; padding: 14px; border-radius: 12px; cursor: pointer; }
 
 /* Сітка з фото */
+/* --- Оновлений блок карток у сітці --- */
 .wish-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 12px;
+    gap: 15px; /* Трохи збільшимо відступ */
+    align-items: start; /* Щоб картки не розтягувалися по висоті найдовшої */
 }
 
 .wish-card {
     position: relative;
+    background: white; /* Фон для картки */
     border-radius: 18px;
     overflow: hidden;
-    aspect-ratio: 1/1;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
     cursor: pointer;
+    transition: transform 0.2s;
+    display: flex;
+    flex-direction: column; /* Елементи один під одним */
 }
 
-.wish-card img {
+.wish-card:hover {
+    transform: translateY(-3px); /* Легкий ефект при наведенні */
+}
+
+/* Контейнер для фото, щоб воно залишалося квадратним */
+.wish-card-photo-wrapper {
+    width: 100%;
+    aspect-ratio: 1/1; /* Робимо фото квадратним */
+    overflow: hidden;
+    position: relative;
+}
+
+.wish-card-photo-wrapper img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: cover; /* Заповнюємо квадрат, не розтягуючи */
+    display: block;
 }
 
-/* Кошик поверх фото */
+/* --- Стилі для підпису (коментаря) --- */
+.wish-card-comment {
+    padding: 10px 12px; /* Відступи всередині */
+    font-size: 0.9rem; /* Трохи менший шрифт */
+    color: #444; /* Колір тексту */
+    font-weight: 500;
+    line-height: 1.3;
+    text-align: center; /* Текст по центру */
+    
+    /* Якщо коментар дуже довгий, обрізаємо його трьома крапками (після 2 рядків) */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Кошик тепер прив'язаний до обгортки фото, а не до всієї картки */
 .delete-btn {
     position: absolute;
     top: 8px;
@@ -141,6 +175,7 @@ input[type="file"] { display: none; }
     align-items: center;
     justify-content: center;
     z-index: 2;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
 /* Модалка */
