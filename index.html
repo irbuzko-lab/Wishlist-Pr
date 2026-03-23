@@ -1,26 +1,30 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Photo Wishlist</title>
-    <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Photo Wishlist</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div class="app-container">
-    <h1>Фото Wishlist</h1>
+    <h1>Wishlist</h1>
 
+    <!-- ВИБІР ЛЮДИНИ -->
     <div class="tabs">
         <button class="tab-btn active" data-user="Іринка">Аллочка</button>
         <button class="tab-btn" data-user="Подруга1">Дашка</button>
         <button class="tab-btn" data-user="Подруга2">Іра</button>
     </div>
 
+    <!-- КНОПКИ -->
     <div class="user-actions">
-        <button id="addItemBtn">Додати фото</button>
+        <button id="addItemBtn">Додати річ</button>
+        <button id="viewListBtn">Подивитися список</button>
     </div>
 
+    <!-- ФОРМА -->
     <form id="itemForm" class="hidden">
         <input type="file" id="itemImageFile" accept="image/*" required>
         <input type="text" id="itemComment" placeholder="Коментар (необов'язково)">
@@ -28,9 +32,11 @@
         <button type="button" id="cancelBtn">Скасувати</button>
     </form>
 
-    <div id="itemList"></div>
+    <!-- СПИСОК -->
+    <div id="itemList" class="hidden"></div>
 </div>
 
+<!-- МОДАЛКА -->
 <div id="itemModal" class="modal hidden">
     <div class="modal-content">
         <span class="close-modal">&times;</span>
