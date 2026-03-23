@@ -12,23 +12,6 @@ const firebaseConfig = {
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-Ось повний код JS з усіма виправленнями. Я додав туди іконки кошика, правильну обробку видалення та оновлену логіку відображення.
-
-Зверни увагу: я додав event.stopPropagation() у функцію видалення, щоб коли ти натискаєш на кошик, у тебе не відкривалося одночасно велике фото.
-
-Оновлений script.js
-JavaScript
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-
-// Твій конфіг (залиш свої дані тут)
-const firebaseConfig = {
-    apiKey: "ТВІЙ_КЛЮЧ",
-    authDomain: "wishlist-app-848bc.firebaseapp.com",
-    databaseURL: "https://wishlist-app-848bc-default-rtdb.europe-west1.firebasedatabase.app",
-    projectId: "wishlist-app-848bc",
-    storageBucket: "wishlist-app-848bc.appspot.com",
-};
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
