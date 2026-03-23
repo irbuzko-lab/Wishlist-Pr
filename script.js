@@ -19,47 +19,57 @@ const db = getDatabase(app);
 let currentUser = "Аллочки"; 
 let currentData = {};
 
-// 1. Відкрити фото на весь екран (Модалка)
+// 1. Відкрити фото
 window.openModal = function(key) {
     const item = currentData[key];
     if (!item) return;
     document.getElementById("modalDetails").innerHTML = `
         <img src="${item.image}" style="max-width:100%; border-radius:15px;">
-        <p style="margin-top:15px; font-weight:600; font-size: 1.2rem;">${item.comment || ''}</p>
+        <p style="margin-top:15px; font-weight:600;">${item.comment || ''}</p>
     `;
     document.getElementById("itemModal").classList.remove("hidden");
 };
 
-// 2. Видалення
+// 2. ВИДАЛЕННЯ (Виправлено)
 window.deleteItem = function(e, key) {
-    e.stopPropagation(); // Важливо: щоб не відкривалася модалка при натисканні на кошик
-    if(confirm("Видалити це бажання?")) {
-        remove(ref(db, `wishlists/${currentUser}/${key}`));
+    e.stopPropagation(); // Зупиняємо відкриття модалки
+    
+    if (confirm("Точно видалити цю річ?")) {
+        const itemRef = ref(db, `wishlists/${currentUser}/${key}`);
+        remove(itemRef)
+            .then(() => {
+                console.log("Видалено успішно:", key);
+            })
+            .catch((error) => {
+                console.error("Помилка видалення:", error);
+                alert("Не вдалося видалити: " + error.message);
+            });
     }
 };
 
-// 3. Таби (Перемикання між людьми)
+// 3. Таби
 document.querySelectorAll(".tab-btn").forEach(btn => {
     btn.onclick = () => {
         document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
         btn.classList.add("active");
         currentUser = btn.getAttribute("data-user");
+        console.log("Змінено користувача на:", currentUser);
         loadData();
     };
 });
 
-// 4. Керування кнопками інтерфейсу
+// 4. Кнопки форми
 document.getElementById("addItemBtn").onclick = () => document.getElementById("itemForm").classList.toggle("hidden");
 document.getElementById("cancelBtn").onclick = () => document.getElementById("itemForm").classList.add("hidden");
 document.querySelector(".close-modal").onclick = () => document.getElementById("itemModal").classList.add("hidden");
 
-// 5. Збереження (Фото + Коментар)
+// 5. Збереження
 document.getElementById("itemForm").onsubmit = function(e) {
     e.preventDefault();
     const file = document.getElementById("itemImageFile").files[0];
     const comment = document.getElementById("itemComment").value;
 
-    if (!file) return alert("Виберіть фото!");
+    if (!file) return alert("Спочатку виберіть фото!");
 
     const reader = new FileReader();
     reader.onload = function() {
@@ -74,23 +84,22 @@ document.getElementById("itemForm").onsubmit = function(e) {
     reader.readAsDataURL(file);
 };
 
-// 6. Завантаження та відображення списку з підписами
+// 6. Завантаження (з виправленим викликом видалення)
 function loadData() {
-    onValue(ref(db, `wishlists/${currentUser}`), (snapshot) => {
+    const container = document.getElementById("itemList");
+    const dbRef = ref(db, `wishlists/${currentUser}`);
+
+    onValue(dbRef, (snapshot) => {
         const data = snapshot.val();
         currentData = data || {};
-        const container = document.getElementById("itemList");
         container.innerHTML = "";
 
         if (data) {
             Object.keys(data).forEach(key => {
                 const item = data[key];
-                
-                // Формуємо підпис, якщо він є
-                const commentHtml = item.comment 
-                    ? `<div class="wish-card-comment">${item.comment}</div>` 
-                    : '';
+                const commentHtml = item.comment ? `<div class="wish-card-comment">${item.comment}</div>` : '';
 
+                // Важливо: onclick="deleteItem(event, '${key}')" - event має бути прописаний повністю
                 container.innerHTML += `
                     <div class="wish-card" onclick="openModal('${key}')">
                         <div class="wish-card-photo-wrapper">
@@ -104,10 +113,10 @@ function loadData() {
                 `;
             });
         } else {
-            container.innerHTML = `<p style="grid-column: 1/3; text-align: center; color: #999; padding: 20px;">Список ${currentUser} порожній</p>`;
+            container.innerHTML = `<p style="grid-column: 1/3; text-align: center; color: #999; padding: 20px;">Тут порожньо</p>`;
         }
     });
 }
 
-// Запускаємо при старті
+// Запуск
 loadData();
