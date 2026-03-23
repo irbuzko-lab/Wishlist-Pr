@@ -16,102 +16,74 @@ import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-let currentUser = "Іринка"; // Початковий користувач
+let currentUser = "Іринка"; 
 let currentData = {};
 
-// 1. Відкрити фото на весь екран
+// Перегляд фото
 window.openModal = function(key) {
     const item = currentData[key];
     if (!item) return;
-    
-    const modal = document.getElementById("itemModal");
-    const details = document.getElementById("modalDetails");
-    
-    details.innerHTML = `
-        <img src="${item.image}" style="max-width:100%; border-radius:15px;">
-        <p style="margin-top:15px; font-weight:600;">${item.comment || 'Без коментаря'}</p>
+    document.getElementById("modalDetails").innerHTML = `
+        <img src="${item.image}">
+        <p style="margin-top:10px; font-weight:600;">${item.comment || ''}</p>
     `;
-    modal.classList.remove("hidden");
+    document.getElementById("itemModal").classList.remove("hidden");
 };
 
-// 2. Видалення (з іконкою кошика)
-window.deleteItem = function(event, key) {
-    event.stopPropagation(); // Зупиняємо відкриття модалки при кліку на кошик
+// Видалення
+window.deleteItem = function(e, key) {
+    e.stopPropagation();
     if(confirm("Видалити це бажання?")) {
         remove(ref(db, `wishlists/${currentUser}/${key}`));
     }
 };
 
-// 3. Закриття модалки
-document.querySelector(".close-modal").onclick = () => {
-    document.getElementById("itemModal").classList.add("hidden");
-};
-
-// 4. Перемикання користувачів (Таби)
+// Таби
 document.querySelectorAll(".tab-btn").forEach(btn => {
     btn.onclick = () => {
-        // Змінюємо візуальний стан кнопок
         document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
         btn.classList.add("active");
-        
-        // Оновлюємо поточного користувача за даними з атрибута data-user
         currentUser = btn.getAttribute("data-user");
-        loadData(); // Перезавантажуємо список для нового юзера
+        loadData();
     };
 });
 
-// 5. Показ/приховування форми
-document.getElementById("addItemBtn").onclick = () => {
-    const form = document.getElementById("itemForm");
-    form.classList.toggle("hidden");
-};
+// Кнопки
+document.getElementById("addItemBtn").onclick = () => document.getElementById("itemForm").classList.toggle("hidden");
+document.getElementById("cancelBtn").onclick = () => document.getElementById("itemForm").classList.add("hidden");
+document.querySelector(".close-modal").onclick = () => document.getElementById("itemModal").classList.add("hidden");
 
-document.getElementById("cancelBtn").onclick = () => {
-    document.getElementById("itemForm").classList.add("hidden");
-};
-
-// 6. Збереження нового бажання (Фото + Коментар)
+// Збереження
 document.getElementById("itemForm").onsubmit = function(e) {
     e.preventDefault();
-    
-    const fileInput = document.getElementById("itemImageFile");
-    const file = fileInput.files[0];
+    const file = document.getElementById("itemImageFile").files[0];
     const comment = document.getElementById("itemComment").value;
 
-    if (!file) {
-        alert("Будь ласка, спочатку вибери фото!");
-        return;
-    }
+    if (!file) return alert("Виберіть фото");
 
     const reader = new FileReader();
     reader.onload = function() {
-        const base64Image = reader.result; // Перетворюємо фото в рядок
-        
         push(ref(db, `wishlists/${currentUser}`), {
-            image: base64Image,
+            image: reader.result,
             comment: comment
-        }).then(() => {
-            e.target.reset(); // Очищуємо форму
-            document.getElementById("itemForm").classList.add("hidden");
         });
+        e.target.reset();
+        document.getElementById("itemForm").classList.add("hidden");
     };
     reader.readAsDataURL(file);
 };
 
-// 7. Головна функція завантаження списку
+// Завантаження
 function loadData() {
-    const container = document.getElementById("itemList");
-    
     onValue(ref(db, `wishlists/${currentUser}`), (snapshot) => {
         const data = snapshot.val();
         currentData = data || {};
+        const container = document.getElementById("itemList");
         container.innerHTML = "";
 
         if (data) {
             Object.keys(data).forEach(key => {
                 const item = data[key];
-                
-                // Створюємо картку: при кліку на неї - модалка, при кліку на кнопку в ній - видалення
                 container.innerHTML += `
                     <div class="wish-card" onclick="openModal('${key}')">
                         <img src="${item.image}">
@@ -122,13 +94,12 @@ function loadData() {
                 `;
             });
         } else {
-            container.innerHTML = `
-                <p style="grid-column: 1/3; text-align: center; color: #999; padding: 20px;">
-                    У ${currentUser} поки немає бажань...
-                </p>`;
+            container.innerHTML = `<p style="grid-column: 1/3; text-align: center; color: #999; padding: 20px;">Список ${currentUser} порожній</p>`;
         }
     });
 }
+
+loadData();
 
 // Запускаємо при першому вході
 loadData();;
